@@ -1,4 +1,4 @@
-# Python Version 2.7.3
+# Python Version 2.7.3 or Version 3.10.8
 # File: minesweeper.py
 
 from tkinter import *
@@ -18,6 +18,7 @@ STATE_FLAGGED = 2
 
 BTN_CLICK = "<Button-1>"
 BTN_FLAG = "<Button-2>" if platform.system() == 'Darwin' else "<Button-3>"
+BTN_DOUBLE_CLICK = "<Double-Button-1>"
 
 window = None
 
@@ -95,6 +96,7 @@ class Minesweeper:
 
                 tile["button"].bind(BTN_CLICK, self.onClickWrapper(x, y))
                 tile["button"].bind(BTN_FLAG, self.onRightClickWrapper(x, y))
+                tile["button"].bind(BTN_DOUBLE_CLICK, self.onDoubleClickWrapper(x, y))
                 tile["button"].grid( row = x+1, column = y ) # offset by 1 row for timer
 
                 self.tiles[x][y] = tile
@@ -167,6 +169,9 @@ class Minesweeper:
     def onRightClickWrapper(self, x, y):
         return lambda Button: self.onRightClick(self.tiles[x][y])
 
+    def onDoubleClickWrapper(self, x, y):
+        return lambda Button: self.onDoubleClick(self.tiles[x][y])
+
     def onClick(self, tile):
         if self.startTime == None:
             self.startTime = datetime.now()
@@ -213,6 +218,11 @@ class Minesweeper:
                 self.correctFlagCount -= 1
             self.flagCount -= 1
             self.refreshLabels()
+
+    def onDoubleClick(self, tile):
+        if tile["state"] == STATE_CLICKED and tile["mines"] == 0:
+            print("Double click on tile: " + str(tile["coords"]["x"]) + ", " + str(tile["coords"]["y"]))
+            self.clearSurroundingTiles(tile["id"])
 
     def clearSurroundingTiles(self, id):
         queue = deque([id])
